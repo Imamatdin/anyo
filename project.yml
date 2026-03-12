@@ -1,0 +1,41 @@
+name: Anyo
+options:
+  bundleIdPrefix: com.anyo
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+
+targets:
+  Anyo:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Anyo
+        excludes:
+          - "**/.gitkeep"
+          - "**/*.sql"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.anyo.app
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_FILE: Anyo/Info.plist
+    dependencies:
+      - package: Supabase
+        product: Supabase
+    info:
+      path: Anyo/Info.plist
+      properties:
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSCameraUsageDescription: "Anyo needs camera access to record video messages for your friends."
+        NSMicrophoneUsageDescription: "Anyo needs microphone access to record audio with your video messages."
