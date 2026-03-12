@@ -2,12 +2,17 @@ name: Build Anyo
 on: [push]
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Generate Xcode project
+      - name: Select latest Xcode
         run: |
-          brew install xcodegen
-          xcodegen generate
+          ls /Applications/ | grep Xcode
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
       - name: Build
-        run: xcodebuild build -project Anyo.xcodeproj -scheme Anyo -destination 'platform=iOS Simulator,name=iPhone 15' -skipPackagePluginValidation
+        run: xcodebuild build -project Anyo.xcodeproj -scheme Anyo -destination 'platform=iOS Simulator,name=iPhone 16' -skipPackagePluginValidation
