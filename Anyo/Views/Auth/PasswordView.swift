@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PasswordView: View {
 
+    let phoneNumber: String
+    let username: String
     @Binding var password: String
     @State  private var showPassword = false
     @FocusState private var focused: Bool
@@ -80,7 +82,14 @@ struct PasswordView: View {
 
             // ── Create Account button ─────────────────────────────────────
             Button {
-                appViewModel.simulateSignUp()
+                let fullPhone = "+1\(phoneNumber.filter(\.isNumber))"
+                Task {
+                    await appViewModel.signUp(
+                        phone: fullPhone,
+                        password: password,
+                        username: username
+                    )
+                }
             } label: {
                 Text("Create Account")
                     .font(.system(size: 17, weight: .semibold))
@@ -103,6 +112,6 @@ struct PasswordView: View {
 }
 
 #Preview {
-    PasswordView(password: .constant(""))
+    PasswordView(phoneNumber: "5551234567", username: "testuser", password: .constant(""))
         .environmentObject(AppViewModel())
 }

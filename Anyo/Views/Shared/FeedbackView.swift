@@ -3,6 +3,7 @@ import SwiftUI
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var feedbackText = ""
+    @State private var showThanks = false
 
     var body: some View {
         ZStack {
@@ -47,8 +48,8 @@ struct FeedbackView: View {
                         if feedbackText.isEmpty {
                             Text("Tell us what we should be building")
                                 .foregroundStyle(Color(white: 0.55))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 14)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
                         }
 
                         TextEditor(text: $feedbackText)
@@ -63,6 +64,28 @@ struct FeedbackView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .padding(.horizontal, 24)
                     .padding(.top, 24)
+
+                    // ── Submit button ────────────────────────────────
+                    Button {
+                        guard !feedbackText.isEmpty else { return }
+                        print("Feedback submitted: \(feedbackText)")
+                        showThanks = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            dismiss()
+                        }
+                    } label: {
+                        Text(showThanks ? "Thanks!" : "Submit")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(feedbackText.isEmpty ? Color.anyoBlue.opacity(0.3) : Color.anyoBlue)
+                            .clipShape(Capsule())
+                    }
+                    .disabled(feedbackText.isEmpty || showThanks)
+                    .animation(.easeInOut(duration: 0.2), value: feedbackText.isEmpty)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 20)
 
                     // ── Back button ──────────────────────────────────
                     Button {

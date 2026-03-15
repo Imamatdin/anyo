@@ -1,9 +1,14 @@
 import SwiftUI
 import AuthenticationServices
+import CryptoKit
 
 struct WelcomeView: View {
 
     let onGetStarted: () -> Void
+
+    @EnvironmentObject private var appViewModel: AppViewModel
+    @State private var showSignIn = false
+    @State private var currentNonce: String?
 
     var body: some View {
         ZStack {
@@ -56,7 +61,7 @@ struct WelcomeView: View {
                 .padding(.horizontal, 32)
 
                 // ── Sign-in link ──────────────────────────────────────────
-                Button(action: { print("Sign in tapped") }) {
+                Button(action: { showSignIn = true }) {
                     (Text("Already an Anyo?  ")
                         .foregroundStyle(Color.anyoText.opacity(0.55))
                     + Text("Sign In")
@@ -82,9 +87,26 @@ struct WelcomeView: View {
 
                 // ── Sign in with Apple ────────────────────────────────────
                 SignInWithAppleButton(.signIn) { request in
+                    let nonce = randomNonceString()
+                    currentNonce = nonce
                     request.requestedScopes = [.fullName, .email]
+                    request.nonce = sha256(nonce)
                 } onCompletion: { result in
-                    print("Apple sign-in result: \(result)")
+                    switch result {
+                    case .success(let authorization):
+                        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                              let tokenData = credential.identityToken,
+                              let idToken = String(data: tokenData, encoding: .utf8),
+                              let nonce = currentNonce else {
+                            print("Apple sign-in: missing token or nonce")
+                            return
+                        }
+                        Task {
+                            await appViewModel.signInWithApple(idToken: idToken, nonce: nonce)
+                        }
+                    case .failure(let error):
+                        print("Apple sign-in error: \(error.localizedDescription)")
+                    }
                 }
                 .signInWithAppleButtonStyle(.black)
                 .frame(height: 50)
@@ -93,9 +115,33 @@ struct WelcomeView: View {
                 .padding(.bottom, 48)
             }
         }
+        .sheet(isPresented: $showSignIn) {
+            SignInView()
+                .environmentObject(appViewModel)
+        }
+    }
+
+    // MARK: - Nonce helpers
+
+    private func randomNonceString(length: Int = 32) -> String {
+        precondition(length > 0)
+        var randomBytes = [UInt8](repeating: 0, count: length)
+        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+        if errorCode != errSecSuccess {
+            fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+        }
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        return String(randomBytes.map { charset[Int($0) % charset.count] })
+    }
+
+    private func sha256(_ input: String) -> String {
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        return hashedData.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 
 #Preview {
     WelcomeView(onGetStarted: {})
+        .environmentObject(AppViewModel())
 }

@@ -94,7 +94,7 @@ struct PhoneNumberView: View {
         case 0:
             return ""
         case 1...3:
-            return "(\(digits)"
+            return digits
         case 4...6:
             return "(\(digits.prefix(3))) \(digits.dropFirst(3))"
         default:

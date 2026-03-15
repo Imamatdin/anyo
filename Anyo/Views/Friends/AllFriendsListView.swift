@@ -3,6 +3,9 @@ import SwiftUI
 struct AllFriendsListView: View {
     @EnvironmentObject private var viewModel: HomeViewModel
 
+    @State private var selectedFriend: MockFriend?
+    @State private var showCamera = false
+
     var body: some View {
         List {
             newAnyosSection
@@ -11,6 +14,11 @@ struct AllFriendsListView: View {
         .listStyle(.plain)
         .background(Color.white.ignoresSafeArea())
         .scrollContentBackground(.hidden)
+        .fullScreenCover(isPresented: $showCamera) {
+            if let friend = selectedFriend {
+                CameraView(friendName: friend.name)
+            }
+        }
     }
 
     // MARK: - New Anyos
@@ -30,7 +38,10 @@ struct AllFriendsListView: View {
                                     size: 65,
                                     color: friend.color,
                                     hasUnwatchedAnyo: true,
-                                    onTap: { print("Tapped \(friend.name)") },
+                                    onTap: {
+                                        selectedFriend = friend
+                                        showCamera = true
+                                    },
                                     showNameOnDrag: false
                                 )
 
@@ -65,7 +76,7 @@ struct AllFriendsListView: View {
                     .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
-                            print("Remove \(friend.name)")
+                            viewModel.removeFriend(id: friend.id)
                         } label: {
                             Label("Remove", systemImage: "person.fill.xmark")
                         }
@@ -95,7 +106,7 @@ struct AllFriendsListView: View {
                 name: friend.name,
                 size: 50,
                 color: friend.color,
-                hasUnwatchedAnyo: false,
+                hasUnwatchedAnyo: friend.hasUnwatchedAnyo,
                 onTap: {},
                 showNameOnDrag: false
             )

@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var friendToDelete: MockFriend?
     @State private var showDeleteAlert = false
     @State private var wiggleActive = false
+    @State private var rotationReset = false
     @State private var selectedFriend: MockFriend?
     @State private var showCamera = false
     @State private var showAddFriendSheet = false
@@ -41,8 +42,10 @@ struct HomeView: View {
         .animation(.easeInOut(duration: 0.25), value: viewModel.isJiggleMode)
         .onChange(of: viewModel.isJiggleMode) { _, jiggling in
             if jiggling {
+                rotationReset = false
                 wiggleActive = true
             } else {
+                rotationReset = true
                 wiggleActive = false
             }
         }
@@ -148,7 +151,7 @@ struct HomeView: View {
                                 showDeleteAlert = true
                             }
                         )
-                        .rotationEffect(.degrees(wiggleActive ? 2 : -2))
+                        .rotationEffect(rotationReset ? .zero : .degrees(wiggleActive ? 2 : -2))
                         .animation(
                             wiggleActive
                                 ? .easeInOut(duration: 0.15)

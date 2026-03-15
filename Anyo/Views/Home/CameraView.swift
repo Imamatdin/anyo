@@ -31,7 +31,7 @@ struct CameraPreviewView: UIViewRepresentable {
 struct CameraView: View {
     let friendName: String
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var cameraService = CameraService.shared
+    @StateObject private var cameraService = CameraService.shared
 
     // Recording state
     @State private var isRecording = false
@@ -93,9 +93,14 @@ struct CameraView: View {
                 }
             }
             .gesture(combinedGesture(screenHeight: geo.size.height))
-            .gesture(dismissSwipeGesture)
+            .simultaneousGesture(dismissSwipeGesture)
         }
         .statusBarHidden()
+        .onAppear { cameraService.startSession() }
+        .onDisappear {
+            progressTimer?.invalidate()
+            progressTimer = nil
+        }
     }
 
     // MARK: - Top Overlay
@@ -151,7 +156,7 @@ struct CameraView: View {
     // MARK: - Hold + Drag Gesture (record)
 
     private func combinedGesture(screenHeight: CGFloat) -> some Gesture {
-        LongPressGesture(minimumDuration: 0.01)
+        LongPressGesture(minimumDuration: 0.3)
             .sequenced(before: DragGesture(minimumDistance: 0))
             .onChanged { value in
                 switch value {
@@ -236,6 +241,7 @@ struct CameraView: View {
 
     private func sendRecording() {
         stopRecording()
+        recordingProgress = 0
 
         print("Video sent to \(friendName)")
 

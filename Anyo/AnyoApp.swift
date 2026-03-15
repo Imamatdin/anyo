@@ -8,9 +8,6 @@ struct AnyoApp: App {
         WindowGroup {
             AppRouterView()
                 .environmentObject(appViewModel)
-                .onAppear {
-                    CameraService.shared.startSession()
-                }
         }
     }
 }

@@ -24,9 +24,12 @@ struct TutorialView: View {
             if new == 3 { hasSeenLastPage = true }
         }
         .onAppear {
-            // Style the page indicator dots to be white on the blue backgrounds
             UIPageControl.appearance().currentPageIndicatorTintColor = .white
             UIPageControl.appearance().pageIndicatorTintColor = UIColor.white.withAlphaComponent(0.4)
+        }
+        .onDisappear {
+            UIPageControl.appearance().currentPageIndicatorTintColor = nil
+            UIPageControl.appearance().pageIndicatorTintColor = nil
         }
     }
 
@@ -70,7 +73,7 @@ private struct TutorialPage1: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 150, height: 150)
-                    .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
 
                 // Play button
                 ZStack {

@@ -22,7 +22,7 @@ struct SignUpFlowView: View {
                 case 1:  PhoneNumberView(phoneNumber: $phoneNumber, onNext: advance)
                 case 2:  UsernameView(username: $username, onNext: advance)
                 case 3:  ProfilePictureView(onNext: advance)
-                default: PasswordView(password: $password)
+                default: PasswordView(phoneNumber: phoneNumber, username: username, password: $password)
                 }
             }
             .transition(slideTransition)
@@ -72,4 +72,5 @@ struct SignUpFlowView: View {
 
 #Preview {
     SignUpFlowView()
+        .environmentObject(AppViewModel())
 }

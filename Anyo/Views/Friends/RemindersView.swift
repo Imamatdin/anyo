@@ -36,8 +36,6 @@ struct RemindersView: View {
             }
         }
         .background(Color.white)
-        .navigationTitle("Reminders")
-        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
             if let friend = friendForReminder {
                 frequencyPicker(for: friend)
@@ -84,9 +82,9 @@ struct RemindersView: View {
                         .font(.system(size: 20))
                         .foregroundStyle(Color.anyoBlue)
                 } else {
-                    Image(systemName: "bell.badge.fill")
+                    Image(systemName: "bell")
                         .font(.system(size: 20))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color(white: 0.55))
                 }
             }
         }
